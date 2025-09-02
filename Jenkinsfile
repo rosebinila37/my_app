@@ -10,7 +10,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Pull latest code from Git
-                git branch: 'main', url: 'https://github.com/rosebinila37/my_app.git'
+                git branch: 'main', url: 'https://github.com/rosebinila37/my_app.git', credentialsId:'e2f02354-08de-4e31-9f6e-8b6261d52fb4'
             }
         }
 
