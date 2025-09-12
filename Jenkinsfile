@@ -2,52 +2,40 @@ pipeline {
     agent any
 
     environment {
-        DEPLOY_DIR = "/var/www/reactapp"
+        IMAGE_NAME = "nginx"
+        IMAGE_TAG = "latest"
+        KUBE_NAMESPACE = "default"
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                // Checkout code from GitHub using Jenkins credentials
-                git branch: 'main',
-                    url: 'https://github.com/rosebinila37/my_app.git',
-                    credentialsId: 'e2f02354-08de-4e31-9f6e-8b6261d52fb4'
+                checkout scm
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Build Docker Image') {
             steps {
-                sh 'npm install'
+                script {
+                    sh 'eval $(minikube docker-env) && docker build -t $IMAGE_NAME:$IMAGE_TAG .'
+                }
             }
         }
 
-        stage('Build') {
+        stage('Deploy to Kubernetes') {
             steps {
-                sh 'npm run build'
+                script {
+                    sh 'kubectl apply -f deployment.yaml'
+                    sh 'kubectl apply -f service.yaml'
+                }
             }
         }
 
-        stage('Deploy') {
+        stage('Verify Deployment') {
             steps {
-                // Copy build files to web server
-                // Use sudo without password for Jenkins or run as www-data user
-                sh """
-                sudo rm -rf ${DEPLOY_DIR}/*
-                sudo cp -r build/* ${DEPLOY_DIR}/
-                sudo chown -R www-data:www-data ${DEPLOY_DIR}
-                sudo chmod -R 755 ${DEPLOY_DIR}
-                """
+                sh 'kubectl get pods -n $KUBE_NAMESPACE'
+                sh 'kubectl get svc -n $KUBE_NAMESPACE'
             }
-        }
-    }
-
-    post {
-        success {
-            echo 'Deployment succeeded!'
-        }
-        failure {
-            echo 'Deployment failed!'
         }
     }
 }
