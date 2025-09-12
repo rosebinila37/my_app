@@ -18,6 +18,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
+                    // This command gives the 'jenkins' user permission to access the Docker socket.
+                    sh 'sudo chmod 666 /var/run/docker.sock' 
                     sh 'docker build -t $DOCKERHUB_USERNAME/$IMAGE_NAME:$IMAGE_TAG .'
                 }
             }
@@ -26,7 +28,6 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    // Use a withDockerRegistry block to handle Docker Hub credentials securely
                     withDockerRegistry([ credentialsId: 'dockerhub-credentials', url: '' ]) {
                         sh 'docker push $DOCKERHUB_USERNAME/$IMAGE_NAME:$IMAGE_TAG'
                     }
@@ -46,7 +47,7 @@ pipeline {
         stage('Verify Deployment') {
             steps {
                 sh 'kubectl get pods -n $KUBE_NAMESPACE'
-                sh 'kubectl get svc -n $KUBE_NAMESPACE'
+                    sh 'kubectl get svc -n $KUBE_NAMESPACE'
             }
         }
     }
