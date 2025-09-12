@@ -15,15 +15,15 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    // This command gives the 'jenkins' user permission to access the Docker socket.
-                    sh 'sudo chmod 666 /var/run/docker.sock' 
-                    sh 'docker build -t $DOCKERHUB_USERNAME/$IMAGE_NAME:$IMAGE_TAG .'
-                }
-            }
+       stage('Build Docker Image') {
+    steps {
+        script {
+            // This command gives the 'jenkins' user permission to access the Docker socket.
+            sh 'chmod 666 /var/run/docker.sock' 
+            sh 'docker build -t $DOCKERHUB_USERNAME/$IMAGE_NAME:$IMAGE_TAG .'
         }
+    }
+}
 
         stage('Push Docker Image') {
             steps {
