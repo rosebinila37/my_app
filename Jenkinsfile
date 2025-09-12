@@ -17,7 +17,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'eval $(minikube docker-env) && docker build -t $IMAGE_NAME:$IMAGE_TAG .'
+                    
+                    sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
                 }
             }
         }
@@ -25,8 +26,9 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    sh 'kubectl apply -f deployment.yaml'
-                    sh 'kubectl apply -f service.yaml'
+                    
+                    sh 'kubectl apply -f nginx-deployment.yaml'
+                    sh 'kubectl apply -f nginx-service.yaml'
                 }
             }
         }
